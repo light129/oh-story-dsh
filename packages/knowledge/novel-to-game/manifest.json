@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "upstream": {
     "repository": "https://github.com/zenstory-ai/novel-to-game.git",
-    "commit": "25e264dc32a82ee2e481b21d22d40874ea84ab27",
+    "commit": "bf0ffbc0cedf20b3f40ba9b60212af27f6713221",
     "releaseVersion": "0.5.0"
   },
-  "generatedAt": "2026-10-15T09:51:03.471Z",
+  "generatedAt": "2026-10-15T10:50:57.961Z",
   "skills": [
     "game-art-direction",
     "game-build",
@@ -661,13 +661,13 @@
     },
     {
       "path": "skills/game-world-design/SKILL.md",
-      "sha256": "3d83f142305906afa9174adba07b7bde2c163489cf4daa7118bc2a113e818c6f",
-      "bytes": 3883
+      "sha256": "c72856e53a0ec22e0c33c2f9fb593e426cdf014d319aecd949c0be25518c693c",
+      "bytes": 3913
     },
     {
       "path": "skills/game-world-design/agents/openai.yaml",
-      "sha256": "4447bb4f6905cc367d6bfc45827877e16c5b3bf4b3ddc00fd3547fe31397bebd",
-      "bytes": 280
+      "sha256": "7dd8700b278aa96b4cf68e5c394c958d788a45a8041c8fe4fbd3b5ac817965bf",
+      "bytes": 336
     },
     {
       "path": "skills/game-world-design/references/narrative-design-method.md",

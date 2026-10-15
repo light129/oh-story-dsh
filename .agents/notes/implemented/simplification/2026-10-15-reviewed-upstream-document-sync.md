@@ -31,5 +31,9 @@ PR #72 首轮 packaged DSH 检查在本地 mock 的 Role 子调用处失败：�
 
 - oh-story：`747b8e30d1e5993dbfb04f38593e1bf36847cab4`
 - drama：`dafe80ee390ec8be5a7ec8dd156a84d511f8e7dd`
-- novel-to-game：`25e264dc32a82ee2e481b21d22d40874ea84ab27`
+- novel-to-game：`bf0ffbc0cedf20b3f40ba9b60212af27f6713221`
 - video-recap：`5785c33d8b5172cfa2837a8a0d57eb4b87837475`
+
+NovelToGame PR #74 合入后，再用专用 `assets:sync:game` 跟进世界设计入口的产物名称修正。固定副本的世界设计 frontmatter 与 openai.yaml 明确输出设计规格，构建仍由现有后续阶段负责；源码行为、案例、badcase 与其他三套固定资产保持原样。manifest 更新为该 PR 的真实合并提交，不改发布版本。
+
+这次两处入口文字同步后，完整 `pnpm verify` 再次通过：lint、typecheck、四套 parity、DSH 边界、16 release tests、3 upstream-update tests、173 unit tests 与 build；没有调用付费 provider。

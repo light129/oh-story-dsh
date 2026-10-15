@@ -13,6 +13,7 @@
 
 ### Changed
 
+- 同步 NovelToGame **0.5.0** 后续文案修正（`bf0ffbc0cedf20b3f40ba9b60212af27f6713221`）：世界设计入口明确交付完整切片设计，原型构建由后续 build 阶段完成；不把设计说明写成已交付可玩版本。
 - 同步四套已审阅上游的技能文档：Oh Story **0.8.5**（`747b8e30d1e5993dbfb04f38593e1bf36847cab4`，13 Skills、7 Roles）、Drama Skills **0.9.0**（`dafe80ee390ec8be5a7ec8dd156a84d511f8e7dd`，11 Skills）、NovelToGame **0.5.0**（`25e264dc32a82ee2e481b21d22d40874ea84ab27`，7 Skills）及 video-recap-skills **0.6.2**（`5785c33d8b5172cfa2837a8a0d57eb4b87837475`，7 Skills）。文案、阶段交接与能力边界按各自已合并的精修结果更新，未手改固定副本。Drama 的旧作者模板随上游退役，创作继续按所需 Markdown 文档交接；不新增旧格式兼容。
 
 ### Fixed
