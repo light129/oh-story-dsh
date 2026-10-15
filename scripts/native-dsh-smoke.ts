@@ -59,7 +59,7 @@ const longReplyContent = [
   longReplyTail
 ].join("\n");
 const roleReference = "story-setup/references/agent-references/writing-craft.md";
-const roleReferenceExcerpt = "贯穿道具系统";
+const roleReferenceExcerpt = "贯穿道具：随情节改变意义";
 const roleSmokePrompt = "ROLE_RUNTIME_SMOKE：必须调用 oh_story_role 的 narrative-writer，并返回子角色结果。";
 const roleChildPrompt = `ROLE_CHILD_SMOKE：必须先调用 oh_story_bundled_reference 读取 ${roleReference}，确认内容包含“${roleReferenceExcerpt}”，再回复指定验证文本。`;
 const roleChildReply = "ROLE_CHILD_RESULT：narrative-writer 子 Agent 已读取打包参考并完成。";

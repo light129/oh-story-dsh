@@ -21,6 +21,10 @@ Status: implemented
 
 ## Verification
 
+PR #72 首轮 packaged DSH 检查在本地 mock 的 Role 子调用处失败：测试仍要求 `writing-craft.md` 含旧标题「贯穿道具系统」，已审上游标题现为「贯穿道具：随情节改变意义」。子角色确实返回了新 reference，但旧锚点使 mock 判为 `role-child-reference-missing-result` 并返回 422；这不是外部 provider 请求失败。测试锚点与由它生成的 prompt 使用当前标题，工具结果读取、错误拒绝及父子结果回传断言保留；不改固定上游字节、运行时、宿主或版本。
+
+该补丁的 ESLint 与三个现有 Role 测试文件（14 tests）通过。用实际 reference 工具返回值调用现有 mock 工厂：旧锚点复现 422，新锚点返回 200；缺失或带错误标记的工具结果仍返回 422，父调用仍须收到子结果。此项验证无外部 provider 调用，不替代提交后 packaged DSH 浏览器 CI 的复验；未重跑整套本地 verify。
+
 四套资源由现有同步命令从已合并提交复制，887 文件及 7 Roles 与实际来源逐字一致。Drama 五份示例与登记摘要、字节数和新提交中的原文完全一致，仅将 sources.json 的 drama commit 更新为新固定来源；不宣称重新生成，不改样例、日期、历史输出或守卫。最终 pnpm verify 全部通过（lint、typecheck、四套 parity、DSH 边界、16 release tests、3 upstream-update tests、173 unit tests 与 build）；此前来源字段未同步的失败日志保留。插件版本、TypeScript 运行时与付费调用不变。收益是插件加载已审文档，代价是同步差异必须逐来源核对。
 
 固定来源：
