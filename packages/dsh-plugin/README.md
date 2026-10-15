@@ -4,10 +4,10 @@
 
 ![小说工作台](https://raw.githubusercontent.com/zenstory-ai/oh-story-dsh/main/docs/images/story-workbench-demo.gif)
 
-`oh-story-dsh` 是基于 DeepSeek Harness（DSH）构建的社区小说、短剧、互动游戏与视频解说创作插件，提供：
+`oh-story-dsh` 是基于 DeepSeek Harness（DSH）构建的社区小说、短剧、互动游戏与视频解说创作插件。以下清单对应当前源码；已发布包按各自的 manifest 固定上游提交。
 
 - 13 个 Oh Story 0.8.5 小说 Skills 与 7 个专业 Roles；
-- 11 个 Drama Skills 0.8.1 短剧流程，每集按请求维护最多五份 creator-first Markdown，成片装配另写《剪辑单.md》；
+- 11 个 Drama Skills 0.9.0 短剧流程，每集按请求维护最多五份创作 Markdown（剧本、视觉设定、分镜、图片提示词、视频提示词），成片装配另写《剪辑单.md》；
 - 7 个 NovelToGame 0.5.0 Skills、`game-adaptations/<project>` 产物协议与《金瓶梅 · 风月总账》ADV 可玩构建；
 - 7 个 video-recap-skills 0.6.2 Skills（3 个用户入口）、`video-recaps/<project>` 项目约定与轻量视频预览工作台；
 - 小说协议 hooks 与安全的 Session workspace 文件路由；
@@ -36,7 +36,7 @@ npx -y @deepseek-ai/dsh@0.2.0-rc.2 web
 
 保持终端运行。若浏览器未自动打开，访问终端打印的完整 `http://127.0.0.1:3080/?token=...` 链接完成首次认证。
 
-`0.2.0-rc.2` 是 npm `latest` 与默认推荐宿主。也可把安装、启动两条命令中的版本同时改为 `0.2.1-alpha.1` 试用 alpha；插件接受 `>=0.2.0-rc.2 <0.2.1-0` 或 `>=0.2.1-alpha.1 <0.2.2-0`，两条线不要混装。
+本页默认命令固定使用 `0.2.0-rc.2`。也可把安装、启动两条命令中的版本同时改为 `0.2.1-alpha.1` 试用 alpha；插件接受 `>=0.2.0-rc.2 <0.2.1-0` 或 `>=0.2.1-alpha.1 <0.2.2-0`，两条线不要混装。
 
 需要 Node.js 24+。开始 AI 创作前需要在 DSH 的「设置 → 模型」中添加 Provider 并填入 API Key，或在启动前设置环境变量 `DEEPSEEK_API_KEY`。
 
@@ -48,7 +48,7 @@ npx -y @deepseek-ai/dsh@0.2.0-rc.2 web
 
 ![短剧工作台](https://raw.githubusercontent.com/zenstory-ai/oh-story-dsh/main/docs/images/drama-workbench-demo.gif)
 
-选择某集的 creator-first 文档后可切换到「生产」，查看镜头板、素材板、任务、成片顺序与关系画布（无限画布：拖动空白处平移、滚轮以光标为中心缩放、方向键移动选中节点、Enter 打开原文，「适应」框选全部节点）；图片与视频按钮先准备完整生产预检，创作者在 Chat 明确确认同一任务后才会运行。
+选择某集的创作文档后可切换到「生产」，查看镜头板、素材板、任务、成片顺序与关系画布（无限画布：拖动空白处平移、滚轮以光标为中心缩放、方向键移动选中节点、Enter 打开原文，「适应」框选全部节点）；图片与视频按钮先准备完整生产预检，创作者在 Chat 明确确认同一任务后才会运行。
 
 ## 游戏工作台
 
@@ -68,7 +68,7 @@ npx -y @deepseek-ai/dsh@0.2.0-rc.2 web
 
 宿主机需要 Python 3.10+、`PATH` 上的 ffmpeg/ffprobe，以及 `MIMO_API_KEY`；Fish Audio TTS 另需 `FISH_API_KEY`，自建 IndexTTS 需 `INDEX_TTS_ENDPOINT` 与 `INDEX_TTS_VOICE`（`TTS_PROVIDER=index-tts`）。Debian/Ubuntu 用 `sudo apt install ffmpeg`；有 libass `subtitles` 滤镜时烧录字幕，没有时交付外部 SRT（也可另装带 libass 的构建）。工作台的「运行环境」检查只报告 DSH Host 进程是否就绪，不返回 Key 内容，密钥也不会写入项目；Agent 实际的执行世界以 `video-recap --doctor` 为准。
 
-短剧生产的图片、视频、语音与音乐不由 DeepSeek 生成，而是由 `short-drama-produce` 调用 GPT Image 2（`OPENAI_API_KEY`）、Seedance（`ARK_API_KEY` + `SEEDANCE_MODEL`）、MiniMax H3（`MINIMAX_API_KEY` + `MINIMAX_VIDEO_MODEL` + `MINIMAX_VIDEO_RESOLUTIONS` + `MINIMAX_VIDEO_MIN_DURATION`/`MINIMAX_VIDEO_MAX_DURATION`）、MiniMax Speech（`MINIMAX_API_KEY`）或 MiniMax Music（`MINIMAX_API_KEY`）生成；Key 在启动 DSH 前写入环境变量，「生产」视图会显示每个供应商是否就绪，插件从不读取 Key 的值。内置 adapter 会自动登记到一份不含凭据的配置文件，自定义时用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向自己的文件。
+短剧生产的图片、视频、语音与音乐不由 DeepSeek 生成，而是由 `short-drama-produce` 调用 GPT Image 2（`OPENAI_API_KEY`）、Seedance（`ARK_API_KEY` + `SEEDANCE_MODEL`）、MiniMax H3（`MINIMAX_API_KEY` + `MINIMAX_VIDEO_MODEL` + `MINIMAX_VIDEO_RESOLUTIONS` + `MINIMAX_VIDEO_MIN_DURATION`/`MINIMAX_VIDEO_MAX_DURATION`）、MiniMax Speech（`MINIMAX_API_KEY`）或 MiniMax Music（`MINIMAX_API_KEY`）生成；Key 在启动 DSH 前写入环境变量，「生产」视图会显示每个供应商是否就绪，插件只向界面返回配置是否存在，不返回 Key 的值。内置 adapter 会自动登记到一份不含凭据的配置文件，自定义时用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向自己的文件。
 
 声音参考需要额外显式配置：自动生成的通用 profile 不声明 `reference_audio`，因为环境变量里的具体模型未必支持声音输入；只有确认所选模型支持后，才在项目外的自定义 adapter 配置里为该 profile 声明 `reference_roles`（包含 `reference_audio`），并用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向它。未声明时会在付费提交前拒绝，不会静默丢掉声音。
 
@@ -85,7 +85,7 @@ Drama Skills 0.6.0 不支持把 v0.5 结构化项目原地升级为 creator-firs
 
 ## 按需加载
 
-插件装进哪个 profile，那个 profile 的每个 Session 就都会加载创作 Skills；工作台只在有创作项目时显示。想让原版 `web` 保持干净、只在创作时打开工作台，就装进独立 profile：
+插件装进哪个 profile，那个 profile 的每个 Session 都能发现创作 Skills，具体指令在使用时读取；工作台只在有创作项目时显示。想让原版 `web` 保持干净、只在创作时打开工作台，就装进独立 profile：
 
 ```bash
 npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.0-rc.2 dsh plugin --profile story add @oh-story/dsh@0.1.15

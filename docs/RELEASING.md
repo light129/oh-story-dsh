@@ -146,7 +146,7 @@ npm view "@oh-story/dsh@$VERSION" version dist.integrity
 npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.0-rc.2 dsh plugin --profile web add "@oh-story/dsh@$VERSION"
 ```
 
-The default public smoke uses npm `latest` (`0.2.0-rc.2`). After it passes,
+The default public smoke pins DSH `0.2.0-rc.2`. After it passes,
 repeat the isolated install/start/browser smoke with
 `@deepseek-ai/dsh@0.2.1-alpha.1`; never mix host versions within one profile or
 describe the alpha line as supported before its Chrome run passes.

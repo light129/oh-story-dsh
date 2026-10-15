@@ -1,15 +1,6 @@
 ---
 name: video-script
-description: >
- 对已完成分析的视频进行导演与剪辑策划，再写带时间戳的中文解说并校验；也处理已有短片的
- 宣发标题、花字修订和外部文案回填。普通策划输入 work_dir 的 agent_narration_brief.md 与
- vlm_analysis.json；文案返修输入当前成片的工程与内容证据。策划输出 recap_story_plan.json、visual_audio_board.json、
- 可选 style_card.json、cut 模式需要的 clip_plan.json，以及通过校验的 narration.json；仅宣发文案任务交付提案或回填既有包装计划。
- 外发说明：只有建议型评审 review.py 联网，它把旁白稿全文与理解证据、策划文件的文字摘录发到 MiMo chat 接口
- （MIMO_API_KEY / MIMO_API_URL，不发视频、图片或音频）；单独使用时只在显式执行时运行，端到端编排默认在 TTS 前运行一次，
- 可用 --no-review-narration / REVIEW_NARRATION=0 关闭（严格评审开启时除外）；validate.py 与 lint 仅在本地运行。
- 触发词：解说词、写解说、视频旁白、宣发标题、花字修订、文案回填、
- narration script、写稿、解说文案、剪辑思路、导演思路。
+description: 对已完成分析的视频进行导演与剪辑策划，再写带时间戳的中文解说并校验；也处理已有短片的 宣发标题、花字修订和外部文案回填。普通策划输入 work_dir 的 agent_narration_brief.md 与 vlm_analysis.json；文案返修输入当前成片的工程与内容证据。策划输出 recap_story_plan.json、visual_audio_board.json、 可选 style_card.json、cut 模式需要的 clip_plan.json，以及通过校验的 narration.json；仅宣发文案任务交付提案或回填既有包装计划。 外发说明：只有建议型评审 review.py 联网，它把旁白稿全文与理解证据、策划文件的文字摘录发到 MiMo chat 接口 （MIMO_API_KEY / MIMO_API_URL，不发视频、图片或音频）；单独使用时只在显式执行时运行，端到端编排默认在 TTS 前运行一次， 可用 --no-review-narration / REVIEW_NARRATION=0 关闭（严格评审开启时除外）；validate.py 与 lint 仅在本地运行。 触发词：解说词、写解说、视频旁白、宣发标题、花字修订、文案回填、 narration script、写稿、解说文案、剪辑思路、导演思路。
 ---
 
 ## 1. 定位
@@ -18,7 +9,7 @@ description: >
 按当前短片的观看理由和兑现位置处理指定文字层，不重做下述策划/旁白链。
 普通解说写作不因此增加平台调研或包装任务。
 
-本技能负责：创作方向、画面/声音计划、旁白写作与校验。Agent 不是 JSON 填写器，而要依次扮演：
+本技能负责创作方向、画面与声音计划、旁白写作及校验。Agent 依次从以下五个角度作出决定：
 
 1. 导演
 2. 故事编辑
@@ -32,7 +23,7 @@ Agent 先记录简洁决定，再写时间线产物。`validate.py` 负责对理
 
 ### 1.1 创作控制模式
 
-先根据用户要求和 `work_dir` 判断本轮模式；它不是 `full|cut|dub` 渲染模式：
+先根据用户要求和 `work_dir` 判断本轮创作控制模式。它与 `full|cut|dub` 渲染模式分别选择：
 
 - **CREATE**：首次创作。比较至少两个真正可行的故事/剪辑假设后再选择。
 - **DIRECTED**：用户已指定结构、镜头、台词或表达。忠实落实，不为满足“创作流程”虚构替代方案。
@@ -217,7 +208,7 @@ full 模式直接按原片时间写；cut 第二阶段先查看 `edited_source.m
 [{"start": 15.0, "end": 17.0, "text": "原声台词"}]
 ```
 
-只写留白中实际听得到的台词，订正 ASR 错字与人名，每条尽量控制在一行；被旁白盖住或已经剪掉的句子不要写。省略时，合成阶段会使用保守的 ASR 映射兜底，并在成片中用 `「」` 区分原声对白与旁白。
+只写留白中实际听得到的台词，订正 ASR 错字与人名，每条尽量控制在一行；被旁白盖住或已经剪掉的句子不要写。省略时，合成阶段可用保守的 ASR 映射兜底。原声对白字幕只在遮罩覆盖留白或用户字幕明确要求替换时生成，并用 `「」` 与旁白区分。
 
 ## 6. 创作自审
 

@@ -1,15 +1,7 @@
 ---
 name: video-voiceover
 user-invocable: false
-description: >
- 把带时间戳的 narration.json 合成为中文解说音频。使用 MiMo TTS（mimo-v2.5-tts）或
- Fish Audio（s2.1-pro-free）或显式配置的通用 IndexTTS HTTP 服务逐段生成语音，
- 按时间窗动态适配语速并处理响度；输入输出时间线上的旁白，产出 tts_segments 与 tts_meta.json。
- 外发说明：每段旁白文字会发给所选 TTS 服务（MiMo / Fish Audio / 用户自托管的 IndexTTS），--voice-ref 的参考音频会发给 MiMo。
- 另含实验性的英译中 dub 路径：只在显式选择 dub 模式并传 --confirm-voice-rights 时运行，会把源视频音频发到 MiMo ASR，
- 并以原说话人的声音为参考经 MiMo voiceclone 克隆配音；只可用于用户有权使用、且说话人同意被克隆声音的内容。
- 触发词：配音、语音合成、TTS、解说配音、
- voiceover、text to speech、旁白配音。
+description: 把带时间戳的 narration.json 合成为中文解说音频。使用 MiMo TTS（mimo-v2.5-tts）或 Fish Audio（s2.1-pro-free）或显式配置的通用 IndexTTS HTTP 服务逐段生成语音， 按时间窗动态适配语速并处理响度；输入输出时间线上的旁白，产出 tts_segments 与 tts_meta.json。 外发说明：每段旁白文字会发给所选 TTS 服务（MiMo / Fish Audio / 用户自托管的 IndexTTS），--voice-ref 的参考音频会发给 MiMo。 另含实验性的英译中 dub 路径：只在显式选择 dub 模式并传 --confirm-voice-rights 时运行，会把源视频音频发到 MiMo ASR， 并以原说话人的声音为参考经 MiMo voiceclone 克隆配音；只可用于用户有权使用、且说话人同意被克隆声音的内容。 触发词：配音、语音合成、TTS、解说配音、 voiceover、text to speech、旁白配音。
 ---
 
 ## 1. 定位
@@ -19,7 +11,7 @@ description: >
 
 ## 2. 远程服务与数据外发
 
-本技能只在下表中被选中的路径上联网，每条路径发出的内容如下。实读文本指 `narration.json` 段落去掉格式与舞台提示后的文字。
+本技能按所选 TTS 或 dub 路径联网。表中的实读文本指 `narration.json` 段落去掉格式与舞台提示后的文字。
 
 | 路径 | 服务与凭据 | 发送内容 |
 |------|------------|----------|
@@ -107,7 +99,7 @@ python3 scripts/voiceover.py --work-dir <work_dir> --narration <narration.json> 
 
 ## 8. 实验性 dub 配音（英译中、克隆原声）
 
-`dub.py` 是实验功能：把英文原声翻译成中文，并用原说话人的克隆音色整轨替换人声。它与上面的解说配音是两条独立路径，`voiceover.py` 从不调用它。
+`dub.py` 是实验功能：把英文原声翻译成中文，并用原说话人的克隆音色整轨替换人声。它与解说配音分别执行，`voiceover.py` 不调用它。
 
 - **触发**：只在用户明确要求英译中配音时，由编排入口以 `--edit-mode dub --confirm-voice-rights` 运行；编排入口把确认参数原样转给 `dub.py` 的准备和渲染两个阶段。没有单独的手动阶段。
 - **确认门禁**：`dub.py` 的两个阶段都必须带 `--confirm-voice-rights`，缺少时在抽取音频和发出任何请求之前退出，并说明会外发什么。编排入口在 dub 模式下同样拒绝缺少该参数的运行，在其他模式下拒绝该参数。

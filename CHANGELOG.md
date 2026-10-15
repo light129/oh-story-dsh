@@ -11,6 +11,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- 同步四套已审阅上游的技能文档：Oh Story **0.8.5**（`747b8e30d1e5993dbfb04f38593e1bf36847cab4`，13 Skills、7 Roles）、Drama Skills **0.9.0**（`dafe80ee390ec8be5a7ec8dd156a84d511f8e7dd`，11 Skills）、NovelToGame **0.5.0**（`25e264dc32a82ee2e481b21d22d40874ea84ab27`，7 Skills）及 video-recap-skills **0.6.2**（`5785c33d8b5172cfa2837a8a0d57eb4b87837475`，7 Skills）。文案、阶段交接与能力边界按各自已合并的精修结果更新，未手改固定副本。Drama 的旧作者模板随上游退役，创作继续按所需 Markdown 文档交接；不新增旧格式兼容。
+
+### Fixed
+
+- 双语 README、安装与升级说明按当前宿主线整理，区分技能目录发现与按需正文读取、短剧核心五文档与剪辑记录、付费媒体任务确认与普通模型调用；安全说明按实际 Session 文件系统、预览和并发写入边界校正。badcase、配对与真实样本保留。短剧 demo 字节与新固定来源完全一致，只更新来源提交登记，不重写历史输出。
+
 ## [0.1.15] - 2026-10-10
 
 ### Changed
