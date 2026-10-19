@@ -62,6 +62,7 @@ import {
   writeWorkbenchPreference,
   type WorkbenchPreference
 } from "./workbench-presence.js";
+import { gamePreviewStatus, previewUrls } from "./game-preview-state.js";
 import { endpoint, handleTabKey } from "./workbench-ui.js";
 import styles from "./plugin.css?inline";
 
@@ -342,7 +343,10 @@ function FileTreeNodes({
   })}</>;
 }
 
-function useWorkspace(sessionId: string): {
+/** How often the workspace is re-listed while the Session runs; see {@link useWorkspace}. */
+const LIVE_WORKSPACE_REFRESH_MS = 4_000;
+
+function useWorkspace(sessionId: string, live: boolean): {
   readonly workspace: WorkspacePayload | undefined;
   readonly error: string | undefined;
   readonly loading: boolean;
@@ -352,6 +356,8 @@ function useWorkspace(sessionId: string): {
   const [workspace, setWorkspace] = useState<WorkspacePayload>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const listed = useRef<string | undefined>(undefined);
+  const inFlight = useRef(false);
   const reload = useCallback(() => {
     setLoading(true);
     setVersion((value) => value + 1);
@@ -359,45 +365,58 @@ function useWorkspace(sessionId: string): {
   useEffect(() => {
     const controller = new AbortController();
     setError(undefined);
+    inFlight.current = true;
     void fetch(endpoint("workspace", sessionId), { signal: controller.signal })
       .then((response) => json<WorkspacePayload>(response))
-      .then(setWorkspace)
+      .then((payload) => {
+        // An unchanged listing keeps the same object, so a quiet refresh re-renders nothing.
+        const text = JSON.stringify(payload);
+        if (text === listed.current) return;
+        listed.current = text;
+        setWorkspace(payload);
+      })
       .catch((reason: unknown) => {
         if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : String(reason));
       })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      .finally(() => {
+        inFlight.current = false;
+        if (!controller.signal.aborted) setLoading(false);
+      });
     return () => { controller.abort(); };
   }, [sessionId, version]);
+  // Writes by Role subagents, background jobs and scripts happen outside this Session's own tool
+  // calls, so nothing here settles until the whole run ends (a Role can write for ten minutes).
+  // While the Session runs, re-list the workspace quietly so new files reach the tree.
+  useEffect(() => {
+    if (!live) return;
+    const timer = globalThis.setInterval(() => {
+      if (inFlight.current || globalThis.document.visibilityState === "hidden") return;
+      setVersion((value) => value + 1);
+    }, LIVE_WORKSPACE_REFRESH_MS);
+    return () => { globalThis.clearInterval(timer); };
+  }, [live]);
   return { workspace, error, loading, reload };
-}
-
-function isolatedPreviewUrl(path: string, version: string, revision: number): { readonly href: string; readonly isolated: boolean } {
-  const url = new URL(path, globalThis.location.origin);
-  if (url.hostname === "127.0.0.1") url.hostname = "localhost";
-  else if (url.hostname === "localhost") url.hostname = "127.0.0.1";
-  url.searchParams.set("build", version);
-  url.searchParams.set("reload", String(revision));
-  return { href: url.toString(), isolated: url.origin !== globalThis.location.origin };
 }
 
 /**
  * An iframe fires `load`, not `error`, when a navigation commits an HTTP error response, so the
  * frame's own events cannot tell a working preview from the route's JSON error body. Probe the
- * same URL out of band and report a non-OK or non-HTML answer as a real failure.
+ * same build out of band (on the page's own origin, see previewUrls) and report a non-OK or
+ * non-HTML answer as a real failure.
  */
-function PreviewProbe({ href, onFailed }: { readonly href: string; readonly onFailed: () => void }) {
+function PreviewProbe({ href, onResult }: { readonly href: string; readonly onResult: (href: string, result: "ok" | "failed") => void }) {
   // Hold the callback in a ref so an inline arrow from the caller cannot re-trigger the probe.
-  const failedRef = useRef(onFailed);
-  useEffect(() => { failedRef.current = onFailed; }, [onFailed]);
+  const resultRef = useRef(onResult);
+  useEffect(() => { resultRef.current = onResult; }, [onResult]);
   useEffect(() => {
     const controller = new AbortController();
     void fetch(href, { signal: controller.signal })
       .then((response) => {
         if (controller.signal.aborted) return;
         const type = response.headers.get("content-type") ?? "";
-        if (!response.ok || !type.includes("text/html")) failedRef.current();
+        resultRef.current(href, response.ok && type.includes("text/html") ? "ok" : "failed");
       })
-      .catch(() => { if (!controller.signal.aborted) failedRef.current(); });
+      .catch(() => { if (!controller.signal.aborted) resultRef.current(href, "failed"); });
     return () => { controller.abort(); };
   }, [href]);
   return null;
@@ -410,6 +429,7 @@ function GamePreview({ project, building }: { readonly project: GameProject; rea
   const [focused, setFocused] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [probe, setProbe] = useState<{ readonly href: string; readonly result: "ok" | "failed" }>();
   const [revision, setRevision] = useState(0);
   const [loadedVersion, setLoadedVersion] = useState(project.previewVersion);
   useEffect(() => {
@@ -429,7 +449,7 @@ function GamePreview({ project, building }: { readonly project: GameProject; rea
     <p>在右侧 Chat 使用 <code>/novel-to-game quick</code>，产物写入 <code>game-adaptations/&lt;project&gt;/build/app/</code> 后会自动出现在这里。</p>
     <div className="oh-game-prompt-example"><span>描述示例</span><q>把《作品名》改编成网页互动游戏，目标玩家是……，核心玩法是……，希望整体风格……</q></div>
   </div>;
-  const preview = isolatedPreviewUrl(project.previewUrl, loadedVersion, revision);
+  const preview = previewUrls(project.previewUrl, loadedVersion, revision, globalThis.location.origin);
   const pending = project.previewVersion !== loadedVersion;
   /** Accept the newer build the creator just chose. */
   const reload = (): void => {
@@ -444,27 +464,34 @@ function GamePreview({ project, building }: { readonly project: GameProject; rea
     setLoadError(false);
     setRevision((value) => value + 1);
   };
-  const runtimeState = loadError ? "预览载入失败 · 可重新载入"
-    : building ? "Agent 正在更新游戏文件 · 当前预览保持不变"
-      : pending ? "新版本已就绪 · 由你决定何时载入"
-        : loaded ? (preview.isolated ? "预览已载入" : "预览已载入 · 当前部署无法隔离来源，存档功能不可用")
-          : "正在载入预览…";
+  const status = gamePreviewStatus({
+    frameLoaded: loaded,
+    frameError: loadError,
+    // A result for an earlier URL describes a build the frame no longer shows.
+    probe: probe?.href === preview.probeHref ? probe.result : "pending",
+    building,
+    pending,
+    isolated: preview.isolated
+  });
+  const runtimeState = status.label;
   const fullscreen = (): void => {
     const shell = shellRef.current;
     if (shell === null) return;
     restoreFullscreenFocus.current = true;
     void shell.requestFullscreen().catch(() => { restoreFullscreenFocus.current = false; });
   };
-  return <div ref={shellRef} className="oh-game-preview-shell" data-state={loadError ? "error" : building ? "building" : loaded ? "ready" : "loading"}>
+  return <div ref={shellRef} className="oh-game-preview-shell" data-state={status.tone}>
     <div className="oh-game-preview-status">
       <span className="oh-game-runtime-state" role="status" aria-live="polite" title={runtimeState}><i aria-hidden /><em>{runtimeState}</em></span>
+      {/* In the status bar, not over the stage: a game's own corner controls stay visible. */}
+      <span className="oh-game-focus-hint" data-focused={focused || undefined}>{focused ? "游戏正在接收键鼠输入" : "点击画面进入试玩"}</span>
       <div>
         {pending && !building && <button type="button" onClick={reload}>载入新版本</button>}
         <button className="oh-game-reload" type="button" onClick={refresh} aria-label="重新载入游戏"><span aria-hidden>↻</span><b>刷新</b></button>
         <button ref={fullscreenButtonRef} type="button" onClick={fullscreen}>全屏试玩</button>
       </div>
     </div>
-    <PreviewProbe href={preview.href} onFailed={() => { setLoaded(false); setLoadError(true); }} />
+    <PreviewProbe href={preview.probeHref} onResult={(href, result) => { setProbe({ href, result }); }} />
     <iframe
       key={`${project.id}:${loadedVersion}:${String(revision)}`}
       src={preview.href}
@@ -475,12 +502,11 @@ function GamePreview({ project, building }: { readonly project: GameProject; rea
       allow="autoplay; fullscreen; gamepad"
       allowFullScreen
       referrerPolicy="no-referrer"
-      onLoad={() => { setLoadError(false); setLoaded(true); }}
+      onLoad={() => { setLoaded(true); }}
       onError={() => { setLoaded(false); setLoadError(true); }}
       onFocus={() => { setFocused(true); }}
       onBlur={() => { setFocused(false); }}
     />
-    <div className="oh-game-focus-hint" data-focused={focused || undefined}>{focused ? "游戏正在接收键鼠输入" : "点击画面进入试玩"}</div>
   </div>;
 }
 
@@ -729,8 +755,17 @@ function CreativeWorkbench({
   const setWorkbenchPreference = actions.setWorkbenchPreference;
   const applyWorkbenchPreference = useCallback((preference: WorkbenchPreference): void => {
     setWorkbenchPreference(preference);
-    writeWorkbenchPreference(workbenchPreferenceStorage(), workspace?.cwd, preference);
-  }, [setWorkbenchPreference, workspace?.cwd]);
+    // Without creative work the only way in is the bundled example, a one-off visit: remembering
+    // it would decide the layout of the creator's first real project in this workspace.
+    if (creativeProject) writeWorkbenchPreference(workbenchPreferenceStorage(), workspace?.cwd, preference);
+  }, [creativeProject, setWorkbenchPreference, workspace?.cwd]);
+  const exampleGameId = workspace?.games.find((game) => game.source === "example")?.id;
+  const playExample = exampleGameId === undefined ? undefined : (): void => {
+    setGameProjectId(exampleGameId);
+    setGameTab("preview");
+    setWorkbench("game");
+    applyWorkbenchPreference("open");
+  };
   const compactTabsId = useId();
   const compactStudioId = `${compactTabsId}-studio-panel`;
   const compactVideoStudioId = `${compactTabsId}-video-studio-panel`;
@@ -1404,7 +1439,7 @@ function CreativeWorkbench({
     // Without creative work there is nothing to reveal, so the plugin leaves the
     // official conversation exactly as DSH renders it. A failed workspace request
     // still offers the way in, because that error is only readable inside the workbench.
-    if (!creativeProject && error === undefined) return welcome ? <WelcomeGuide /> : null;
+    if (!creativeProject && error === undefined) return welcome ? <WelcomeGuide onPlayExample={playExample} /> : null;
     return <div ref={surfaceRef} className="oh-story-split-surface" data-open="false">
       <style>{styles}</style>
       <button className="oh-story-launcher" type="button" title={error ?? "打开创作工作台"} aria-label="打开创作工作台" onClick={() => { applyWorkbenchPreference("open"); }}>
@@ -1679,7 +1714,7 @@ function SessionWorkbenchBridge({ sessionId, useSession, useSessions, useProject
   ), [inboxRows, pendingSubmissions]);
   const chat = useChat((snapshot) => snapshot);
   const productionIntents = useMemo(() => settledProductionIntents(chat), [chat]);
-  const { workspace, error, loading: workspaceLoading, reload } = useWorkspace(sessionId);
+  const { workspace, error, loading: workspaceLoading, reload } = useWorkspace(sessionId, sessionRunning);
   const chosenPreference = useStore((memory) => memory.workbenchPreference);
   const creativeProject = hasCreativeProject(workspace);
   // DSH 0.1.7 opens a fresh home straight into a blank Session in its default workspace, so
@@ -1849,8 +1884,11 @@ function SessionWorkbenchBridge({ sessionId, useSession, useSessions, useProject
 
 type WorkbenchSeatProps = PropsRuntime<"shell.overlay"> & PropsRenderSlots<"oh-story.workspace">;
 
-/** How to reach the workbench from a DSH that has no creative work open yet. */
-function WelcomeGuide() {
+/**
+ * How to reach the workbench from a DSH that has no creative work open yet. Only a Session can
+ * open the workbench, so the bundled example's entry appears when one is supplied.
+ */
+function WelcomeGuide({ onPlayExample }: { readonly onPlayExample?: (() => void) | undefined }) {
   return <section className="oh-story-welcome" aria-label="Oh Story 使用引导">
     <style>{styles}</style>
     <h2>Oh Story 已加载</h2>
@@ -1860,6 +1898,10 @@ function WelcomeGuide() {
       <li>想放进自己的作品文件夹：点击左侧「工作区 / Workspaces」旁的「添加工作区 / Add workspace」，在系统弹出的文件夹窗口里选择，再在下方「选择工作区 / Choose workspace」中选中它。</li>
       <li>输入框右下角显示模型名就说明已配置好；没有模型时，在「设置 → 模型」填入 API Key。只查看已有作品无需 API Key。</li>
     </ol>
+    {onPlayExample !== undefined && <div className="oh-story-welcome-example">
+      <button type="button" onClick={onPlayExample}>先玩内置示例《金瓶梅 · 风月总账》</button>
+      <span>随插件附带的完整 ADV 游戏，不用 API Key。内容 18+，进入前会确认年龄。</span>
+    </div>}
   </section>;
 }
 

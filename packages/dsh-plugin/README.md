@@ -8,7 +8,7 @@
 
 - 13 个 Oh Story 0.9.0 小说 Skills 与 7 个专业 Roles；
 - 11 个 Drama Skills 0.9.0 短剧流程，每集按请求维护最多五份创作 Markdown（剧本、视觉设定、分镜、图片提示词、视频提示词），成片装配另写《剪辑单.md》；
-- 7 个 NovelToGame 0.6.0 Skills、`game-adaptations/<project>` 产物协议与《金瓶梅 · 风月总账》ADV 可玩构建；
+- 7 个 NovelToGame 0.6.0 Skills、`game-adaptations/<project>` 产物协议与《金瓶梅 · 风月总账》ADV 可玩构建（18+，欢迎卡「先玩内置示例」即可试玩）；
 - 7 个 video-recap-skills 0.6.2 Skills（3 个用户入口）、`video-recaps/<project>` 项目约定与轻量视频预览工作台；
 - 小说协议 hooks 与安全的 Session workspace 文件路由；
 - 小说/短剧的文件树、编辑器、Chat 三栏工作台，以及游戏/视频的“左侧工作台 + 右侧 Chat”制作面板；
@@ -66,9 +66,9 @@ npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 给 /path/to/video.mp4 做一个 3 分钟中文解说成片，保留关键原声，字幕烧进画面。
 ```
 
-宿主机需要 Python 3.10+、`PATH` 上的 ffmpeg/ffprobe，以及 `MIMO_API_KEY`；Fish Audio TTS 另需 `FISH_API_KEY`，自建 IndexTTS 需 `INDEX_TTS_ENDPOINT` 与 `INDEX_TTS_VOICE`（`TTS_PROVIDER=index-tts`）。Debian/Ubuntu 用 `sudo apt install ffmpeg`；有 libass `subtitles` 滤镜时烧录字幕，没有时交付外部 SRT（也可另装带 libass 的构建）。工作台的「运行环境」检查只报告 DSH Host 进程是否就绪，不返回 Key 内容，密钥也不会写入项目；Agent 实际的执行世界以 `video-recap --doctor` 为准。
+宿主机需要 Python 3.10+、`PATH` 上的 ffmpeg/ffprobe，以及 `MIMO_API_KEY`；Fish Audio TTS 另需 `FISH_API_KEY`，自建 IndexTTS 需 `INDEX_TTS_ENDPOINT` 与 `INDEX_TTS_VOICE`（`TTS_PROVIDER=index-tts`）。Debian/Ubuntu 用 `sudo apt install ffmpeg`；有 libass `subtitles` 滤镜时烧录字幕，没有时交付外部 SRT（也可另装带 libass 的构建）。Key 与 `PATH` 在启动 DSH 的终端里设置，重启后生效。视频空状态和「产物」页的「运行环境」检查只报告 DSH Host 进程是否就绪，不返回 Key 内容，密钥也不会写入项目；Agent 实际的执行世界以 `video-recap --doctor` 为准。
 
-短剧生产的图片、视频、语音与音乐不由 DeepSeek 生成，而是由 `short-drama-produce` 调用 GPT Image 2（`OPENAI_API_KEY`）、Seedance（`ARK_API_KEY` + `SEEDANCE_MODEL`）、MiniMax H3（`MINIMAX_API_KEY` + `MINIMAX_VIDEO_MODEL` + `MINIMAX_VIDEO_RESOLUTIONS` + `MINIMAX_VIDEO_MIN_DURATION`/`MINIMAX_VIDEO_MAX_DURATION`）、MiniMax Speech（`MINIMAX_API_KEY`）或 MiniMax Music（`MINIMAX_API_KEY`）生成；Key 在启动 DSH 前写入环境变量，「生产」视图会显示每个供应商是否就绪，插件只向界面返回配置是否存在，不返回 Key 的值。内置 adapter 会自动登记到一份不含凭据的配置文件，自定义时用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向自己的文件。
+短剧生产的图片、视频、语音与音乐不由 DeepSeek 生成，而是由 `short-drama-produce` 调用 GPT Image 2（`OPENAI_API_KEY`）、Seedance（`ARK_API_KEY` + `SEEDANCE_MODEL`）、MiniMax H3（`MINIMAX_API_KEY` + `MINIMAX_VIDEO_MODEL` + `MINIMAX_VIDEO_RESOLUTIONS` + `MINIMAX_VIDEO_MIN_DURATION`/`MINIMAX_VIDEO_MAX_DURATION`）、MiniMax Speech（`MINIMAX_API_KEY`）或 MiniMax Music（`MINIMAX_API_KEY`）生成；生产与检查脚本需要 Python 3.9+；Key 在启动 DSH 前写入环境变量，「生产」视图会显示 Python 与每个供应商是否就绪，插件只向界面返回配置是否存在，不返回 Key 的值。内置 adapter 会自动登记到一份不含凭据的配置文件，自定义时用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向自己的文件。
 
 声音参考需要额外显式配置：自动生成的通用 profile 不声明 `reference_audio`，因为环境变量里的具体模型未必支持声音输入；只有确认所选模型支持后，才在项目外的自定义 adapter 配置里为该 profile 声明 `reference_roles`（包含 `reference_audio`），并用 `OH_STORY_DRAMA_ADAPTER_CONFIG` 指向它。未声明时会在付费提交前拒绝，不会静默丢掉声音。
 

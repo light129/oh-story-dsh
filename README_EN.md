@@ -41,7 +41,7 @@ The table describes the current source. Published packages pin their upstream co
 | --- | --- | --- |
 | Novel | [Oh Story 0.9.0](https://github.com/zenstory-ai/oh-story-claudecode/releases/tag/v0.9.0) · 13 Skills · 7 Roles | `/story`, `/story-long-write`, `/story-review` |
 | Short drama | [Drama Skills 0.9.0](https://github.com/zenstory-ai/drama-skills/releases/tag/v0.9.0) · 11 Skills | `/short-drama`, `/short-drama-write`, `/short-drama-storyboard`, `/short-drama-edit` |
-| Game | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · playable 《金瓶梅》 ADV sample | `/novel-to-game quick`, `/game-build`, `/game-qa` |
+| Game | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · playable 《金瓶梅》 ADV sample (18+) | `/novel-to-game quick`, `/game-build`, `/game-qa` |
 | Video | [video-recap-skills 0.6.2](https://github.com/zenstory-ai/video-recap-skills/releases/tag/v0.6.2) · 7 Skills (3 user entry points) | `/video-recap`, `/video-script`, `/video-reference` |
 
 > Latest release **v0.1.17** (2026-10-19). The default install pins DeepSeek Harness `0.2.1-rc.2`; the earlier `0.2.0-rc.2` remains supported. See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases); upgrade steps are in the FAQ entry [“What do I do after upgrading?”](#what-do-i-do-after-upgrading).
@@ -66,13 +66,13 @@ Each episode maintains up to five core creative Markdown files as needed: `剧�
 
 ![Game workbench](docs/images/game-workbench-demo.gif)
 
-Live playtest on the left, Chat on the right. Output from `/novel-to-game quick` goes to `game-adaptations/<project>/`; once `build/app/index.html` is ready the project appears in the list and can be refreshed, made full-screen or switched. Games run on a separate origin inside an iframe sandbox.
+Live playtest on the left, Chat on the right. Output from `/novel-to-game quick` goes to `game-adaptations/<project>/`; once `build/app/index.html` is ready the project appears in the list and can be refreshed, made full-screen or switched. Games run on a separate origin inside an iframe sandbox. The bundled Jin Ping Mei ADV sample plays without an API key: before you have any work, click 「先玩内置示例」 (play the bundled sample) on the welcome card; afterwards pick it under 「内置示例」 in the 「游戏项目」 (game project) list. Adapted from the classical novel, it contains adult content (18+) and asks you to confirm your age before it starts.
 
 ### Video recap
 
 ![Video workbench](docs/images/video-workbench-demo.gif)
 
-Preview on the left, Chat on the right. Projects live in `video-recaps/<project>/`: source footage in `sources/`, working files in `work/`, deliverables in `outputs/`. Switch between source, rough cut and final, and inspect stage hints, the run checklist and QC artifacts; video streams over HTTP Range.
+Preview on the left, Chat on the right. Projects live in `video-recaps/<project>/`: source footage in `sources/`, working files in `work/`, deliverables in `outputs/`. Switch between source, rough cut and final, and inspect stage hints, the run checklist and QC artifacts; video streams over HTTP Range. Before any video project exists, the empty state lists the runtime check: whether Python 3.10+, ffmpeg/ffprobe and `MIMO_API_KEY` are ready.
 
 ### Rules shared by all four
 
@@ -110,14 +110,14 @@ npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 <details>
 <summary>Host dependencies for the video workbench</summary>
 
-The video pipeline additionally needs Python 3.10+ and ffmpeg/ffprobe on the host (Debian/Ubuntu `sudo apt install ffmpeg`). With the libass `subtitles` filter it burns subtitles in; without that filter it delivers an external SRT, or you can install a libass-enabled build. Video recaps use `MIMO_API_KEY` (Fish Audio TTS additionally needs `FISH_API_KEY`).
+The video pipeline additionally needs Python 3.10+ and ffmpeg/ffprobe on the host (Debian/Ubuntu `sudo apt install ffmpeg`). With the libass `subtitles` filter it burns subtitles in; without that filter it delivers an external SRT, or you can install a libass-enabled build. Video recaps use `MIMO_API_KEY` (Fish Audio TTS additionally needs `FISH_API_KEY`). Set keys and `PATH` in the terminal that starts DSH; they take effect after DSH restarts.
 
 </details>
 
 <details>
 <summary>Configure media-generation APIs (needed for short-drama production)</summary>
 
-DeepSeek writes the screenplay, storyboard and prompts; image, video, speech and music generation is handed by short-drama Production to the `short-drama-produce` Skill, which calls the vendor APIs below. Set the keys as host environment variables before starting DSH:
+DeepSeek writes the screenplay, storyboard and prompts; image, video, speech and music generation is handed by short-drama Production to the `short-drama-produce` Skill, which calls the vendor APIs below. The production and check scripts need Python 3.9+ on the host. Set the keys as host environment variables before starting DSH:
 
 | Capability | Vendor | Required variables | Optional |
 | --- | --- | --- | --- |
@@ -326,7 +326,7 @@ Add a work directory and open a session first. In an empty directory, run a crea
 
 ### Does it work on Windows?
 
-Yes. The type, asset, unit-test and build gate runs on both macOS and Windows in CI on every change; the integration test that packages the plugin into the official DSH Web runs on Linux. The video pipeline needs Python 3.10+ and ffmpeg/ffprobe on every platform, burning subtitles with libass or delivering an external SRT without it; long-form analysis, import and long-form tracking also need Python 3 on the host, and short-drama assembly needs ffmpeg/ffprobe, with libass for the default burned-in subtitles and Node.js (Remotion) whenever the cut list has on-screen text; the long-form chapter check needs Node.js 18+.
+Yes. The type, asset, unit-test and build gate runs on both macOS and Windows in CI on every change; the integration test that packages the plugin into the official DSH Web runs on Linux. The video pipeline needs Python 3.10+ and ffmpeg/ffprobe on every platform, burning subtitles with libass or delivering an external SRT without it; long-form analysis, import and long-form tracking also need Python 3 on the host, the short-drama check and production scripts need Python 3.9+, and short-drama assembly needs ffmpeg/ffprobe, with libass for the default burned-in subtitles and Node.js (Remotion) whenever the cut list has on-screen text; the long-form chapter check needs Node.js 18+.
 
 ### What do I do after upgrading?
 

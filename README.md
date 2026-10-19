@@ -39,7 +39,7 @@
 | --- | --- | --- |
 | 小说 | [Oh Story 0.9.0](https://github.com/zenstory-ai/oh-story-claudecode/releases/tag/v0.9.0) · 13 Skills · 7 Roles | `/story`、`/story-long-write`、`/story-review` |
 | 短剧 | [Drama Skills 0.9.0](https://github.com/zenstory-ai/drama-skills/releases/tag/v0.9.0) · 11 Skills | `/short-drama`、`/short-drama-write`、`/short-drama-storyboard`、`/short-drama-edit` |
-| 游戏 | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · 《金瓶梅》ADV 可玩示例 | `/novel-to-game quick`、`/game-build`、`/game-qa` |
+| 游戏 | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · 《金瓶梅》ADV 可玩示例（18+） | `/novel-to-game quick`、`/game-build`、`/game-qa` |
 | 视频 | [video-recap-skills 0.6.2](https://github.com/zenstory-ai/video-recap-skills/releases/tag/v0.6.2) · 7 Skills（3 个用户入口） | `/video-recap`、`/video-script`、`/video-reference` |
 
 > 最新版本 **v0.1.17**（2026-10-19）。默认安装固定使用 DeepSeek Harness `0.2.1-rc.2`；仍支持更早的 `0.2.0-rc.2`。变更见 [CHANGELOG.md](CHANGELOG.md) 与 [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases)；升级步骤见常见问题[「升级到新版本后要做什么」](#升级到新版本后要做什么)。
@@ -64,13 +64,13 @@
 
 ![游戏工作台](docs/images/game-workbench-demo.gif)
 
-左侧实时试玩、右侧 Chat。`/novel-to-game quick` 的产物写进 `game-adaptations/<project>/`，`build/app/index.html` 就绪后自动进入项目列表，可刷新、全屏、切换项目。游戏在独立 origin 与 iframe sandbox 里运行。
+左侧实时试玩、右侧 Chat。`/novel-to-game quick` 的产物写进 `game-adaptations/<project>/`，`build/app/index.html` 就绪后自动进入项目列表，可刷新、全屏、切换项目。游戏在独立 origin 与 iframe sandbox 里运行。随包的《金瓶梅 · 风月总账》ADV 示例不用 API Key 也能玩：还没有作品时点欢迎卡上的「先玩内置示例」，之后在「游戏项目」下拉的「内置示例」里选择。示例改编自古典小说，含成人内容（18+），进入前会确认年龄。
 
 ### 视频解说
 
 ![视频工作台](docs/images/video-workbench-demo.gif)
 
-左侧预览、右侧 Chat。项目放在 `video-recaps/<project>/`：原片在 `sources/`，工作产物在 `work/`，交付在 `outputs/`。可在原片、剪后片、成片之间切换，查看阶段提示、运行清单与质检产物；视频经 HTTP Range 流式预览。
+左侧预览、右侧 Chat。项目放在 `video-recaps/<project>/`：原片在 `sources/`，工作产物在 `work/`，交付在 `outputs/`。可在原片、剪后片、成片之间切换，查看阶段提示、运行清单与质检产物；视频经 HTTP Range 流式预览。还没有视频项目时，空状态先列出运行环境：Python 3.10+、ffmpeg/ffprobe 与 `MIMO_API_KEY` 是否就绪。
 
 ### 四个工作台共同的规矩
 
@@ -108,14 +108,14 @@ npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 <details>
 <summary>视频工作台的宿主机依赖</summary>
 
-视频流水线还需要宿主机安装 Python 3.10+ 与 ffmpeg/ffprobe（Debian/Ubuntu `sudo apt install ffmpeg`）。带 libass `subtitles` 滤镜时会烧录字幕；未提供该滤镜的构建交付外部 SRT，也可另装带 libass 的构建。视频解说另用 `MIMO_API_KEY`（Fish Audio TTS 另需 `FISH_API_KEY`）。
+视频流水线还需要宿主机安装 Python 3.10+ 与 ffmpeg/ffprobe（Debian/Ubuntu `sudo apt install ffmpeg`）。带 libass `subtitles` 滤镜时会烧录字幕；未提供该滤镜的构建交付外部 SRT，也可另装带 libass 的构建。视频解说另用 `MIMO_API_KEY`（Fish Audio TTS 另需 `FISH_API_KEY`）。Key 与 `PATH` 在启动 DSH 的终端里设置，重启 DSH 后生效。
 
 </details>
 
 <details>
 <summary>配置媒体生成 API（短剧生产需要）</summary>
 
-DeepSeek 负责写剧本、分镜和提示词；生图、生视频、配音、生音乐由短剧「生产」交给 `short-drama-produce` Skill，再调用下面的供应商 API 完成。Key 在启动 DSH 之前写入宿主机环境变量：
+DeepSeek 负责写剧本、分镜和提示词；生图、生视频、配音、生音乐由短剧「生产」交给 `short-drama-produce` Skill，再调用下面的供应商 API 完成。生产与检查脚本需要宿主机上的 Python 3.9+。Key 在启动 DSH 之前写入宿主机环境变量：
 
 | 能力 | 供应商 | 必需环境变量 | 可选 |
 | --- | --- | --- | --- |
@@ -316,7 +316,7 @@ DSH 的 `plugin add` 内部需要 pnpm，单独运行 `npx @deepseek-ai/dsh ... 
 
 ### Windows 能用吗？
 
-能。类型、资产、单测与构建这道门在 CI 里每次都在 macOS 和 Windows 上跑；打包后装进官方 DSH Web 的集成测试在 Linux 上跑。视频流水线在任何平台都需要 Python 3.10+ 与 ffmpeg/ffprobe；有 libass 时烧录字幕，没有时交付外部 SRT；长篇拆文、导入与长篇追踪同样需要宿主机上的 Python 3，短剧成片需要 ffmpeg/ffprobe，默认的烧录字幕还要求 ffmpeg 带 libass，剪辑单里有「画面文字」时还需要 Node.js（Remotion）；长篇的章节检查需要 Node.js 18+。
+能。类型、资产、单测与构建这道门在 CI 里每次都在 macOS 和 Windows 上跑；打包后装进官方 DSH Web 的集成测试在 Linux 上跑。视频流水线在任何平台都需要 Python 3.10+ 与 ffmpeg/ffprobe；有 libass 时烧录字幕，没有时交付外部 SRT；长篇拆文、导入与长篇追踪同样需要宿主机上的 Python 3，短剧的检查与生产脚本需要 Python 3.9+，短剧成片需要 ffmpeg/ffprobe，默认的烧录字幕还要求 ffmpeg 带 libass，剪辑单里有「画面文字」时还需要 Node.js（Remotion）；长篇的章节检查需要 Node.js 18+。
 
 ### 升级到新版本后要做什么？
 

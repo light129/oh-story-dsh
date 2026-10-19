@@ -12,7 +12,7 @@ import { SessionId } from "@deepseek-ai/dsh-session";
 import type {} from "@deepseek-ai/dsh-typert-registry";
 import { type GameVerificationBinding, WorkspaceVerificationTracker } from "./game-verification.js";
 import { dramaAdapterStatuses, ensureDramaAdapterConfig, type DramaAdapterStatus } from "./drama-adapters.js";
-import { commandOutput, hostPython } from "./host-python.js";
+import { commandOutput, DRAMA_PYTHON, hostPython, VIDEO_PYTHON, type PythonProbe } from "./host-python.js";
 import { defaultDramaSkillRoot, defaultNovelToGameSkillRoot } from "./skill-provider.js";
 import { skipVideoDirectory, summarizeVideoProject, VIDEO_DIRECTORY, videoProjectRoot, visibleVideoPath, type VideoProjectSummary } from "./video-project.js";
 import { isTrustedPreviewNavigation, isTrustedWorkspaceRequest } from "./workspace-request-trust.js";
@@ -49,7 +49,7 @@ interface WorkspaceRouteOptions {
 
 /** Host-process capability probe. The Agent's execution world may differ; `video-recap --doctor` is authoritative there. */
 interface VideoPreflightSummary {
-  readonly python: { readonly ok: boolean; readonly version?: string | undefined };
+  readonly python: PythonProbe;
   readonly ffmpeg: { readonly ok: boolean; readonly subtitles: boolean };
   readonly ffprobe: { readonly ok: boolean };
   readonly credentials: { readonly mimo: boolean; readonly fish: boolean; readonly indexTts: boolean; readonly ttsProvider: string };
@@ -111,7 +111,7 @@ function configured(...names: readonly string[]): boolean {
  * `production_tool.py run` lives. Values never leave the process.
  */
 interface DramaPreflightSummary {
-  readonly python: { readonly ok: boolean; readonly version?: string | undefined };
+  readonly python: PythonProbe;
   readonly adapterConfig: { readonly path: string; readonly generated: boolean; readonly ok: boolean };
   readonly adapters: readonly DramaAdapterStatus[];
 }
@@ -124,7 +124,7 @@ async function dramaPreflight(): Promise<DramaPreflightSummary> {
   // racing it, and the write itself is atomic (temp file + rename).
   dramaPreflightInFlight ??= (async () => {
     try {
-      const python = await hostPython();
+      const python = await hostPython(DRAMA_PYTHON);
       const adapterConfig = await ensureDramaAdapterConfig(defaultDramaSkillRoot(), { python: python.command });
       const value = { python: python.probe, adapterConfig, adapters: dramaAdapterStatuses() };
       dramaPreflightCache = { expires: Date.now() + 30_000, value };
@@ -136,7 +136,7 @@ async function dramaPreflight(): Promise<DramaPreflightSummary> {
 
 async function videoPreflight(): Promise<VideoPreflightSummary> {
   if (videoPreflightCache !== undefined && videoPreflightCache.expires > Date.now()) return videoPreflightCache.value;
-  const python = (await hostPython()).probe;
+  const python = (await hostPython(VIDEO_PYTHON)).probe;
   const [ffmpegOutput, ffmpegFilters, ffprobeOutput] = await Promise.all([
     commandOutput("ffmpeg", ["-version"]),
     commandOutput("ffmpeg", ["-hide_banner", "-filters"]),
@@ -504,9 +504,20 @@ async function previewDigest(realm: WorkspaceRealm, projectRoot: string): Promis
   return { ready, version: createHash("sha256").update(entries.sort().join("\n")).digest("hex").slice(0, 16) };
 }
 
-function headingTitle(content: string | undefined, fallback: string): string {
+/**
+ * The game's name from its brief's first heading, e.g. `# PRODUCT_BRIEF — 《雪夜渡》` → `雪夜渡`.
+ * The Studio adds its own 书名号 and separators, so neither the file label nor the work's
+ * 书名号 belong in the name.
+ */
+export function gameProjectTitle(content: string | undefined, fallback: string): string {
   const heading = content?.split(/\r?\n/u).find((line) => /^#\s+/u.test(line));
-  return heading?.replace(/^#\s+/u, "").replace(/^PRODUCT_BRIEF\s*[·・:]?\s*/iu, "").trim() || fallback;
+  const title = heading?.replace(/^#\s+/u, "")
+    .replace(/^(?:PRODUCT[_ ]BRIEF|产品简报)/iu, "")
+    .replace(/^[\s·・:：|—–-]+/u, "")
+    .trim()
+    .replace(/^《([^《》]+)》$/u, "$1")
+    .trim();
+  return title || fallback;
 }
 
 async function workspaceGameProjects(
@@ -538,7 +549,7 @@ async function workspaceGameProjects(
     return {
       id: `workspace:${id}`,
       root,
-      title: headingTitle(brief, id),
+      title: gameProjectTitle(brief, id),
       source: "workspace" as const,
       previewReady: preview.ready,
       previewUrl: preview.ready

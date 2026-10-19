@@ -50,7 +50,7 @@ const ASSEMBLED_CUT_PATH = "制作成果/成片/成片.mp4";
 
 /** Mirror of the host `/oh-story/drama-preflight` summary: presence only, never values. */
 interface DramaPreflight {
-  readonly python: { readonly ok: boolean; readonly version?: string };
+  readonly python: { readonly ok: boolean; readonly version?: string; readonly minimum: string };
   readonly adapterConfig: { readonly path: string; readonly generated: boolean; readonly ok: boolean };
   readonly adapters: readonly DramaAdapterStatus[];
 }
@@ -116,7 +116,7 @@ function ProductionStatus({ sessionId, diagnostics, onNavigate }: {
         ? <button type="button" className="oh-story-status-pill" data-tone="error" onClick={() => { setPreflight(undefined); setAttempt((value) => value + 1); }}><i aria-hidden="true" />环境检查失败<em>重试</em></button>
         : <button type="button" className="oh-story-status-pill" data-tone={environmentTone} aria-expanded={open === "environment"} aria-controls="oh-story-production-environment" aria-label="媒体生成环境" onClick={() => { toggle("environment"); }}>
           <i aria-hidden="true" />生成环境
-          <em>{typeof preflight !== "object" ? "检查中…" : !preflight.python.ok ? "需要 Python 3.10+" : `${String(configured)}/${String(total)} 供应商已配置`}</em>
+          <em>{typeof preflight !== "object" ? "检查中…" : !preflight.python.ok ? `需要 Python ${preflight.python.minimum}+` : `${String(configured)}/${String(total)} 供应商已配置`}</em>
           <b aria-hidden="true" />
         </button>}
       {diagnostics.length > 0 && <button type="button" className="oh-story-status-pill" data-tone={protocolErrors > 0 ? "error" : "warning"} aria-expanded={open === "diagnostics"} aria-controls="oh-story-production-diagnostics" onClick={() => { toggle("diagnostics"); }}>
@@ -125,7 +125,7 @@ function ProductionStatus({ sessionId, diagnostics, onNavigate }: {
     </div>
     {open === "environment" && typeof preflight === "object" && <section className="oh-story-status-panel" id="oh-story-production-environment" aria-label="媒体生成环境详情">
       <ul className="oh-story-provider-list">
-        <li data-ready={preflight.python.ok || undefined} data-error={!preflight.python.ok || undefined}><i aria-hidden="true" /><span>运行</span><strong>Python</strong><small>{preflight.python.ok ? preflight.python.version : `${preflight.python.version ?? "未找到"} · Skill 脚本需要 3.10+`}</small></li>
+        <li data-ready={preflight.python.ok || undefined} data-error={!preflight.python.ok || undefined}><i aria-hidden="true" /><span>运行</span><strong>Python</strong><small>{preflight.python.ok ? preflight.python.version : `${preflight.python.version ?? "未找到"} · 短剧脚本需要 ${preflight.python.minimum}+`}</small></li>
         {preflight.adapters.map((adapter) => <li key={adapter.name} data-ready={adapter.configured || undefined}>
           <i aria-hidden="true" /><span>{MODALITY_LABEL[adapter.modality]}</span><strong>{adapter.label}</strong>
           {adapter.configured ? <small>已配置</small> : <small>缺 {adapter.missing.map((name) => <code key={name}>{name}</code>)}</small>}
