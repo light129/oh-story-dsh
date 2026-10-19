@@ -168,7 +168,7 @@ function VideoEnvironment({ sessionId }: { readonly sessionId: string }) {
     }).catch(() => { if (!controller.signal.aborted) setPreflight("failed"); });
     return () => { controller.abort(); };
   }, [attempt, sessionId]);
-  return <div className="oh-video-environment" aria-label="视频运行环境">
+  return <div className="oh-video-environment" role="group" aria-label="视频运行环境">
     <strong>运行环境</strong>
     {typeof preflight === "object" ? <VideoEnvironmentReport preflight={preflight} />
       : preflight === "failed" ? <button type="button" onClick={() => { setPreflight(undefined); setAttempt((value) => value + 1); }}>环境检查失败 · 重试</button>

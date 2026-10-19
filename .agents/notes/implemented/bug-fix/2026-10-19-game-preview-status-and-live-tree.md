@@ -16,7 +16,7 @@ Status: implemented
 
 - 状态规则抽到 `client/game-preview-state.ts`。探测改为请求页面自身来源上的同一路由（字节相同，同源读取可信），iframe 仍加载隔离别名。探测结果按 URL 记录，只对当前构建有效；iframe `load` 不再清掉探测发现的失败。显示优先级：Agent 正在改写时显示「正在更新」；已有新版本等待载入时显示「新版本已就绪」（画面在播时为绿点）；之后才是「载入失败」。
 - `hostPython(floor)` 由调用方给出下限：短剧用 `DRAMA_PYTHON = [3, 9]`（插件启动时生成的 adapter 配置与「生产」预检），视频用 `VIDEO_PYTHON = [3, 10]`。预检结果带上 `minimum`，界面按它显示「需要 Python 3.9+」或「3.10+」。单测读取全部随包短剧脚本声明的 `MINIMUM_PYTHON`，与 `DRAMA_PYTHON` 不一致就失败，上游以后提高下限会被同步发现。
-- 会话运行期间，`useWorkspace` 每 4 秒静默重新列出工作区：上一次请求未返回或页面隐藏时跳过；列表与上次相同时保留原对象，不触发重渲染。会话停止后不再轮询，工具调用结束时的即时刷新照旧。
+- 会话运行期间，`useWorkspace` 每 4 秒静默重新列出工作区：上一次请求未返回或页面隐藏时跳过，错误提示只在请求成功时清除，避免反复失败时闪烁；列表与上次相同时保留原对象，不触发重渲染。会话停止后不再轮询，工具调用结束时的即时刷新照旧。
 - 工作区路由的 `gameProjectTitle` 去掉开头的 `PRODUCT_BRIEF`／`Product Brief`／`产品简报` 及其后的分隔符（空白、`·`、`:`、`|`、各种破折号），并去掉包住整个名字的一对书名号。名字中间的书名号保留，界面再自己加书名号。
 - 试玩提示移进预览状态栏，紧挨按钮；紧凑布局和窄栏中隐藏。
 
@@ -37,4 +37,4 @@ Status: implemented
 - `packages/dsh-plugin` 新增 `tests/game-preview-state.test.ts`（状态优先级、探测地址同源、项目名清理）与 `tests/video-environment.test.tsx`。`tests/drama-adapters.test.ts` 新增按下限选择解释器的用例，并核对随包脚本声明的 `MINIMUM_PYTHON`。
 - `pnpm test:dsh` 的首次启动页从欢迎卡打开《金瓶梅》示例，在 `127.0.0.1` 来源、隔离别名 iframe 下等到「预览已载入」，并核对 `data-state="ready"`。
 - 文件树的运行中刷新没有自动化用例：确定性夹具模型不会派出长时间写文件的子角色。正确性靠工作区路由已有的列表测试，加上「列表不变则不更新」的实现保证。
-- 2026-10-19 本地 `pnpm verify` 通过（lint、类型、四套 parity、DSH 边界、单测 25 文件 198 项、构建）；`pnpm test:dsh` 在 DSH 0.2.1-rc.2 上返回 `"ok": true`。
+- 2026-10-19 本地 `pnpm verify` 通过（lint、类型、四套 parity、DSH 边界、单测 25 文件 198 项、构建）；`pnpm verify:release` 在 DSH 0.2.1-rc.2 与 0.2.0-rc.2 上的打包浏览器验证均返回 `"ok": true`。

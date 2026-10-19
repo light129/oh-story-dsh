@@ -357,18 +357,19 @@ function useWorkspace(sessionId: string, live: boolean): {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
   const listed = useRef<string | undefined>(undefined);
-  const inFlight = useRef(false);
+  const inFlight = useRef<AbortController | undefined>(undefined);
   const reload = useCallback(() => {
     setLoading(true);
     setVersion((value) => value + 1);
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    setError(undefined);
-    inFlight.current = true;
+    inFlight.current = controller;
     void fetch(endpoint("workspace", sessionId), { signal: controller.signal })
       .then((response) => json<WorkspacePayload>(response))
       .then((payload) => {
+        // Cleared only on success: a quiet refresh that fails again must not blink the error away.
+        setError(undefined);
         // An unchanged listing keeps the same object, so a quiet refresh re-renders nothing.
         const text = JSON.stringify(payload);
         if (text === listed.current) return;
@@ -379,7 +380,8 @@ function useWorkspace(sessionId: string, live: boolean): {
         if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : String(reason));
       })
       .finally(() => {
-        inFlight.current = false;
+        // An aborted request settles after its successor started; only the owner clears the flag.
+        if (inFlight.current === controller) inFlight.current = undefined;
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => { controller.abort(); };
@@ -390,7 +392,7 @@ function useWorkspace(sessionId: string, live: boolean): {
   useEffect(() => {
     if (!live) return;
     const timer = globalThis.setInterval(() => {
-      if (inFlight.current || globalThis.document.visibilityState === "hidden") return;
+      if (inFlight.current !== undefined || globalThis.document.visibilityState === "hidden") return;
       setVersion((value) => value + 1);
     }, LIVE_WORKSPACE_REFRESH_MS);
     return () => { globalThis.clearInterval(timer); };
@@ -756,8 +758,12 @@ function CreativeWorkbench({
   const applyWorkbenchPreference = useCallback((preference: WorkbenchPreference): void => {
     setWorkbenchPreference(preference);
     // Without creative work the only way in is the bundled example, a one-off visit: remembering
-    // it would decide the layout of the creator's first real project in this workspace.
-    if (creativeProject) writeWorkbenchPreference(workbenchPreferenceStorage(), workspace?.cwd, preference);
+    // it would decide the layout of the creator's first real project in this workspace. A choice
+    // the workspace already remembers stays the creator's to change.
+    const storage = workbenchPreferenceStorage();
+    if (creativeProject || readWorkbenchPreference(storage, workspace?.cwd) !== undefined) {
+      writeWorkbenchPreference(storage, workspace?.cwd, preference);
+    }
   }, [creativeProject, setWorkbenchPreference, workspace?.cwd]);
   const exampleGameId = workspace?.games.find((game) => game.source === "example")?.id;
   const playExample = exampleGameId === undefined ? undefined : (): void => {

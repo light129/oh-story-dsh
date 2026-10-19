@@ -19,6 +19,7 @@ Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earl
   - Drama and game workspaces opened on an empty 小说 tab.
   - The welcome card implied that adding a folder came first.
 - The build now runs a bundled checker and fails if it cannot load. The rebuilt candidate was re-checked on a fresh DSH `0.2.1-rc.2`: the short-story workspace shows 小说 · 短篇, and a drama-only workspace opens on 短剧 before and after a reload.
+- The plugin-owned P2/P3 findings were also fixed before tagging: the bundled Jin Ping Mei example (18+) is reachable from the welcome card before any creative work; the empty 视频 state runs the runtime check; the game preview probe reads the build on the page's own origin, so it no longer reports a false 「预览载入失败」 beside a working game; the drama Python floor follows the bundled scripts' declared 3.9 (video stays 3.10); the file tree re-lists the workspace while a Session runs; and game project names drop the brief label, dash and wrapping 书名号. The packaged smoke covers the example entry, the loaded preview status across the loopback-alias isolation and the empty-video runtime check.
 - Findings that belong to the DSH host are recorded for upstream follow-up rather than claimed as fixed: stop not cascading to subagents, the native folder picker's missing page feedback, English progress, and token-only usage. So are findings that belong to the upstream Skills: long first-turn latency, short chapters, and editing on a vague request without asking first.
 
 ### Paid provider
@@ -27,7 +28,7 @@ Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earl
 
 ### Release gates
 
-- **Local aggregate acceptance:** passed 2026-10-19. This is the full `pnpm verify:release` with packaged Chrome on `0.2.1-rc.2` and `0.2.0-rc.2`, repeated on the final source after the audit fixes.
+- **Local aggregate acceptance:** passed 2026-10-19. This is the full `pnpm verify:release` with packaged Chrome on `0.2.1-rc.2` and `0.2.0-rc.2`, repeated on the final source after the audit fixes, and again after the P2/P3 follow-up fixes (198 unit/contract tests across 25 files).
 - **New-user audit:** passed 2026-10-19. No P0 findings, and every plugin-owned P1 was fixed and re-verified on DSH.
 - **Paid provider:** passed 2026-10-19. Native Story and Drama review succeeded, with both required Roles returning results.
 
@@ -189,7 +190,7 @@ The gate discovers all `*.test.ts` and `*.contract.test.ts` files. Coverage clai
 - running + queued submissions read from the host `inbox` projection, exact Queue removal, current-Turn cancellation with the remaining Queue preserved but not auto-executed, and a late real MP4 that upgrades a completed batch from 0/22 to an explicit 1/22 partial result without a render loop;
 - a complete mixed sequence whose creator explicitly selects `交付/EP001/`'s IMG still for SHOT-EP001-001 ahead of an available video while the other 21 shots use video; it previews the actual still/video sources, dispatches the ordered native assembly request to `/short-drama-edit`, refuses a second composition while the first is unsettled, and completes only after the fixed upstream deliverable `制作成果/成片/成片.mp4` appears in the Agent FileSystem;
 - the short-drama production shot board, two-version selection and restoration, same-episode delivery artifact discovery, explicit IMG selection, accepted SHOT keyframe fallback, mixed-source sequence reorder/blockers, asset board, relationship canvas, keyboard layout movement, native `/short-drama-produce` Conversation dispatch, realistic image/video version backfill and cross-document source navigation;
-- first-launch guidance in the blank default-workspace Session a fresh DSH opens (its first-use Documents folder redirected into the temporary root), its containment at 500 px, its 「先玩内置示例」 entry opening the Jin Ping Mei preview as loaded (not failed) across the loopback-alias isolation, the empty 视频 state's runtime check, the guide's return in a new blank Session (the example visit is not remembered for the workspace), its retirement after that Session's first prompt, and removal when entering a creative Session;
+- first-launch guidance in the blank default-workspace Session a fresh DSH opens (its first-use Documents folder redirected into the temporary root), its containment at 500 px, its 「先玩内置示例」 entry opening the Jin Ping Mei preview as loaded (not failed) across the loopback-alias isolation, the empty 视频 state's runtime check, no workspace layout remembered after the example visit and the guide's return when it is collapsed, its retirement after that Session's first prompt, and removal when entering a creative Session;
 - blank-session mounting, Session-switch draft recovery after DSH releases the Session's Store, source editing, conflict isolation and saved-state behavior;
 - ordered tree/editor/Chat geometry at desktop and 500 px widths, a Composer that remains fixed during long-message scrolling, and anchor clearance in wide, medium and compact layouts.
 

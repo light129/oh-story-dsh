@@ -765,6 +765,12 @@ async function main(): Promise<void> {
     const firstRunVideo = firstRunPage.locator(".oh-video-studio");
     await firstRunVideo.getByText("还没有视频项目", { exact: true }).waitFor({ state: "visible", timeout: 10_000 });
     await firstRunVideo.getByLabel("视频运行环境").getByText(/^Python /u).waitFor({ state: "visible", timeout: 10_000 });
+    // The visit is the Session's alone: nothing is remembered for the workspace, and collapsing
+    // returns the blank Session to its guide (DSH 0.2.0 reuses this Session for New session).
+    const rememberedLayout = await firstRunPage.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith("oh-story.workbench.")));
+    if (rememberedLayout.length !== 0) throw new Error(`The example visit was remembered for the workspace: ${JSON.stringify(rememberedLayout)}`);
+    await firstRunVideo.getByRole("button", { name: "收起创作工作台", exact: true }).click();
+    await welcome.waitFor({ state: "visible", timeout: 10_000 });
 
 
     const storyWorkspace = await rpc<{ readonly workspace: { readonly workspaceId: string; readonly title: string } }>(origin, "workspace/create", { request: { path: storyRoot } });
