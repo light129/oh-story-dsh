@@ -11,6 +11,15 @@
 
 ## [Unreleased]
 
+## [0.1.17] - 2026-10-19
+
+### Changed
+
+- 默认宿主更新到 npm `latest` 的 [DeepSeek Harness 0.2.1-rc.2](https://github.com/deepseek-ai/deepseek-harness/releases/tag/dsh-v0.2.1-rc.2)，配套 Cordis / Schemastery 回到稳定版 `4.0.5` / `3.18.5`；安装命令改用 `0.2.1-rc.2`，更早的 `0.2.0-rc.2` 继续支持并在发布前做同样的打包浏览器验证。插件声明的兼容范围不变，不再单独提供 alpha 试用线。
+- 同步 [Oh Story 0.9.0](https://github.com/zenstory-ai/oh-story-claudecode/releases/tag/v0.9.0)（`74080143dd1ac9a39a930fafd99a0dbbe61b946a`，`agents_version` 35 → 36，13 Skills、7 Roles）：参考资料按写书的步骤重新整理；作者只说「这章没劲」「节奏拖」时先诊断再回炉；导入的长篇卷纲改用单元卡，导完用 `/story-long-write 写第N章` 续写；短篇平台统一叫「知乎盐言」。书稿、设定、追踪和作者记忆不用迁移；之前导入的长篇，续写前先让 `/story-long-write` 把旧剧情单元改写成单元卡。
+- DSH 技能桥跟随 Oh Story 0.9.0：助手回复与等后台角色时的进度说明都用作者的语言；小说入口、审稿和封面按同一套规则找当前书、分长短篇（多本书时问作者并写入 `.active-book`）；长篇扫榜一次问齐平台、频道、新书还是大盘和题材，推荐选题附上建议拆的对标书；短篇扫榜接收编辑的征稿要求并当作硬条件；导入流程按新的结构迁移步骤运行并带上卷纲格式检查。上游新增的宿主项目说明合并脚本不打包进 DSH。
+- 同步 [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game/releases/tag/v0.6.0)（`7758caa8d9578f19780349e7b4e4115ef831fd7a`，7 Skills）：需求里记录制作预算，白盒试玩后与生产过半时按剩余预算复盘范围；每个视觉目标给约三个候选，`director` 模式停下请你挑选；构建阶段用实际运行截图对照目标图修正；2.5D 角色可选烘焙序列帧路线。白盒试玩需要「没读过设计的新玩家」时，在 DSH 里先问你能否找真实玩家，否则用当前 Preset 可见的子代理试玩。
+
 ## [0.1.16] - 2026-10-16
 
 ### Changed
