@@ -17,9 +17,11 @@ import {
   latestSettledMutationTurn,
   mutatingCallIds,
   openTurn,
+  initialWorkbenchMode,
   preferredWorkbenchFile,
   previewMutation,
   sameUndispatchedCalls,
+  SHORT_STORY_FILES,
   streamingAssistant,
   undispatchedCalls,
   workbenchLabel,
@@ -274,7 +276,7 @@ class WorkspaceRequestError extends Error {
 }
 
 const GROUP_ORDER: Readonly<Record<WorkbenchMode, readonly string[]>> = {
-  story: ["正文", "大纲", "设定", "追踪", "对标", "参考资料"],
+  story: ["短篇", "正文", "大纲", "设定", "追踪", "对标", "参考资料"],
   drama: ["项目", "输入", "项目开发", "设定集", "剧集", "审查", "创作者决策", "交付"],
   game: ["game-adaptations"],
   video: ["video-recaps"]
@@ -284,7 +286,9 @@ const WORKBENCH_MODES = ["story", "drama", "game", "video"] as const;
 const EDITOR_MODES = ["preview", "source", "production"] as const;
 
 function groupForPath(path: string): string {
-  return path === "short-drama.json" ? "项目" : path.split("/", 1)[0] ?? "其他";
+  if (path === "short-drama.json") return "项目";
+  if (SHORT_STORY_FILES.has(path)) return "短篇";
+  return path.split("/", 1)[0] ?? "其他";
 }
 
 async function json<T>(response: Response): Promise<T> {
@@ -840,6 +844,14 @@ function CreativeWorkbench({
   const editorPositions = useRef(new Map<string, { readonly scrollTop: number; readonly selectionStart: number; readonly selectionEnd: number }>());
   const editorReady = buffer !== undefined && buffer.missing !== true;
   const workspaceKind = workbench === "game" || workbench === "video" ? undefined : workbench;
+  // A Session starts on 小说; once per workspace, move to the workbench that actually holds work.
+  const initialWorkbenchFor = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (workspace === undefined || initialWorkbenchFor.current === workspace.cwd) return;
+    initialWorkbenchFor.current = workspace.cwd;
+    const next = initialWorkbenchMode(workbench, workspace.files, workspace.games, workspace.videos);
+    if (next !== workbench) setWorkbench(next);
+  }, [setWorkbench, workbench, workspace]);
   const gameBuilding = normalizedActivities.some(({ path }) => path.startsWith("game-adaptations/"));
   const videoBuilding = normalizedActivities.some(({ path }) => path.startsWith("video-recaps/"));
 

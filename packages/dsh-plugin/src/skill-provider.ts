@@ -86,6 +86,7 @@ const DSH_GAME_BRIDGE = [
   "The 游戏 tab is the playable Game Studio. Never start a second Agent runtime, dashboard, session transport, or model configuration.",
   "Keep the complete upstream seven-Skill pipeline and write adaptation artifacts under game-adaptations/<project>/ exactly as the upstream contracts specify.",
   "For a web target, keep the authoritative playable entry at build/app/index.html so Game Studio can preview it. Do not silently replace a requested non-web runtime with a web build.",
+  "The first time build/app/index.html becomes playable, tell the user in one sentence that they can already play it in the 游戏 tab and what work remains, then continue; keep the Todo list in step with the pipeline stage.",
   "Use only DSH-visible tools and approvals. qa/verification.json remains the sole machine QA truth and must cover launch, render, input, coreLoop, outcome, and restart with real execution evidence.",
   // NovelToGame 0.6.0 pipeline-contract.md: with no target player available, the whitebox playtest uses a fresh agent that has not read the design or source.
   "When the whitebox playtest calls for a fresh agent that has not read the design documents or source, run it as a DSH subagent visible in this preset, giving it only the playable entry and normal player input; in director mode, ask the user in this Session first whether a real target player can try it.",

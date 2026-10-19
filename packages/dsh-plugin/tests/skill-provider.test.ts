@@ -341,6 +341,7 @@ describe("NovelToGame bundled provider", () => {
       expect(skill?.content).toContain("game-adaptations/<project>/");
       expect(skill?.content).toContain("qa/verification.json remains the sole machine QA truth");
       expect(skill?.content).toContain("run it as a DSH subagent visible in this preset, giving it only the playable entry and normal player input");
+      expect(skill?.content).toContain("tell the user in one sentence that they can already play it in the 游戏 tab");
       expect(skill?.resourceBase).toEqual({ kind: "directory", path: resolve(gameRoot, candidate.name) });
     }
     const route = await provider.get(listed.find((candidate) => candidate.name === "novel-to-game")!, {});

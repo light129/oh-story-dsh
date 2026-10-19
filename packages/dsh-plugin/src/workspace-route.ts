@@ -23,7 +23,9 @@ const GAME_DIRECTORY = "game-adaptations";
 // Preview studios need only a small manifest-driven subset, so discover them before a very large
 // prose workspace can consume the shared listing budget.
 const CREATIVE_DIRECTORIES = [VIDEO_DIRECTORY, GAME_DIRECTORY, ...STORY_DIRECTORIES, ...DRAMA_DIRECTORIES] as const;
-const ROOT_FILES = new Set(["short-drama.json"]);
+// Oh Story short fiction keeps one book as three files at the book root (DSH: the workspace root).
+const SHORT_STORY_FILES = ["正文.md", "设定.md", "小节大纲.md"] as const;
+const ROOT_FILES = new Set<string>(["short-drama.json", ...SHORT_STORY_FILES]);
 const EDITABLE_EXTENSIONS = new Set([".md", ".txt", ".json", ".jsonl"]);
 const GAME_EDITABLE_EXTENSIONS = new Set([...EDITABLE_EXTENSIONS, ".html", ".css", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx"]);
 const VIDEO_EDITABLE_EXTENSIONS = new Set([...EDITABLE_EXTENSIONS, ".srt", ".ass"]);
