@@ -1,6 +1,35 @@
 # Validation
 
-Released: `@oh-story/dsh` 0.1.16 on DeepSeek Harness `0.2.0-rc.2`, with explicit `0.2.1-alpha.4` coverage. Local aggregate acceptance and paid-provider review passed on 2026-10-16.
+Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earlier `0.2.0-rc.2` line covered. Local aggregate acceptance, a new-user product audit and paid-provider review passed on 2026-10-19.
+
+## 0.1.17 release evidence
+
+### Local evidence
+
+- Oh Story 0.9.0 (`74080143dd1a`), 13 Skills, 7 Roles and `agents_version` 36; NovelToGame 0.6.0 (`7758caa8d957`), 7 Skills. Both were synced from clean clones of the release tags. Drama 0.9.0 (`dafe80ee390e`) and video-recap 0.6.2 (`5785c33d8b51`) keep their pins. Upstream's new `story-setup/scripts/merge-project-instructions.py` is excluded by the synchronizer and rejected by parity.
+- Between DSH `0.2.1-alpha.4` and `0.2.1-rc.2`, every `@deepseek-ai` package the plugin imports has byte-identical type declarations, and every DOM selector the packaged smoke uses is still present.
+- The candidate (`ba64b81`) passed clean-source `pnpm verify:release`: lint, typecheck, four parity checks, the DSH boundary, release and upstream-update tests, 179 unit/contract tests and the build. Packaged Chrome on both DSH `0.2.1-rc.2` and `0.2.0-rc.2` returned `"ok": true`.
+
+### New-user audit
+
+- Four personas (short story, long-form serial, short drama, game/video) used the packed candidate on a fresh DSH `0.2.1-rc.2` home, following the README install, with a real DeepSeek model. Each completed its main task: an 8052-character short story, a book opening with 5 chapters, a 60-episode outline with the first three scripts, and a playable five-ending game from a user-written story. Output quality scored 4.0–4.6. There were no P0 findings.
+- The audit found four plugin defects, all fixed before release:
+  - The bundled require-based checkers failed under the package's ESM type. This affected short-story design, outline contract, deslop detection and the chapter check.
+  - Short stories at the workspace root never showed in the 小说 workbench.
+  - Drama and game workspaces opened on an empty 小说 tab.
+  - The welcome card implied that adding a folder came first.
+- The build now runs a bundled checker and fails if it cannot load. The rebuilt candidate was re-checked on a fresh DSH `0.2.1-rc.2`: the short-story workspace shows 小说 · 短篇, and a drama-only workspace opens on 短剧 before and after a reload.
+- Findings that belong to the DSH host are recorded for upstream follow-up rather than claimed as fixed: stop not cascading to subagents, the native folder picker's missing page feedback, English progress, and token-only usage. So are findings that belong to the upstream Skills: long first-turn latency, short chapters, and editing on a vague request without asking first.
+
+### Paid provider
+
+- On 2026-10-19, `pnpm test:dsh:real` on the fixed source (`bac50b1`) passed on DSH `0.2.1-rc.2` with `deepseek-official/deepseek-flash`. Both review Skills resolved to the installed plugin. There were 2 Role calls, and both required Roles returned successful, non-empty results. Story and drama produced 130 and 66 durable events, and the project digest remained unchanged. The operator-authorized credential was read from a 0600 temporary file and never appeared in logs.
+
+### Release gates
+
+- **Local aggregate acceptance:** passed 2026-10-19. This is the full `pnpm verify:release` with packaged Chrome on `0.2.1-rc.2` and `0.2.0-rc.2`, repeated on the final source after the audit fixes.
+- **New-user audit:** passed 2026-10-19. No P0 findings, and every plugin-owned P1 was fixed and re-verified on DSH.
+- **Paid provider:** passed 2026-10-19. Native Story and Drama review succeeded, with both required Roles returning results.
 
 ## 0.1.16 release evidence
 
