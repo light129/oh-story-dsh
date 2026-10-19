@@ -44,7 +44,7 @@ The table describes the current source. Published packages pin their upstream co
 | Game | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · playable 《金瓶梅》 ADV sample (18+) | `/novel-to-game quick`, `/game-build`, `/game-qa` |
 | Video | [video-recap-skills 0.6.2](https://github.com/zenstory-ai/video-recap-skills/releases/tag/v0.6.2) · 7 Skills (3 user entry points) | `/video-recap`, `/video-script`, `/video-reference` |
 
-> Latest release **v0.1.17** (2026-10-19). The default install pins DeepSeek Harness `0.2.1-rc.2`; the earlier `0.2.0-rc.2` remains supported. See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases); upgrade steps are in the FAQ entry [“What do I do after upgrading?”](#what-do-i-do-after-upgrading).
+> Latest release **v0.1.18** (2026-10-19). The default install pins DeepSeek Harness `0.2.1-rc.2`; the earlier `0.2.0-rc.2` remains supported. See [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases); upgrade steps are in the FAQ entry [“What do I do after upgrading?”](#what-do-i-do-after-upgrading).
 
 ## The four workbenches
 
@@ -87,7 +87,7 @@ Boundaries and protocols for each workbench are in the [architecture notes](docs
 Requires Node.js 24+. The install command provides pnpm temporarily, so a machine with only Node.js can run it:
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add @oh-story/dsh@0.1.17 &&
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add @oh-story/dsh@0.1.18 &&
 npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 ```
 
@@ -101,7 +101,7 @@ Before creating with AI, add a Provider and API key under DSH's Settings → Mod
 The prebuilt package in the GitHub Release passes the same test suite:
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add https://github.com/zenstory-ai/oh-story-dsh/releases/download/v0.1.17/oh-story-dsh-0.1.17.tgz &&
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add https://github.com/zenstory-ai/oh-story-dsh/releases/download/v0.1.18/oh-story-dsh-0.1.18.tgz &&
 npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 ```
 
@@ -145,7 +145,7 @@ Voice references require an explicit capability declaration: generated generic p
 Whichever profile the plugin is installed into, every Session of that profile loads the creation Skills. To keep the stock `web` profile clean, install into a separate profile:
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile story add @oh-story/dsh@0.1.17
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile story add @oh-story/dsh@0.1.18
 ```
 
 A new profile has no UI by default. Edit `~/.dsh/profiles/story/package.json` and set `dsh.profile.bundles` to:
@@ -331,6 +331,8 @@ Yes. The type, asset, unit-test and build gate runs on both macOS and Windows in
 ### What do I do after upgrading?
 
 Rerun the install command with the target version after `@oh-story/dsh@`, then restart DSH. Use the same host version for installation and startup; see [Installation](#installation) for the supported range. Skills and Roles ship with the plugin and need no redeployment into projects.
+
+Version 0.1.18 finishes the interface findings from the 0.1.17 new-user audit (the bundled-example entry, the video runtime check, the game preview status, Python 3.9+ for short drama); it needs no migration, only a reinstall and restart.
 
 Version 0.1.17 includes Oh Story 0.9.0: each Skill's references are reorganized around the writing step they serve; manuscripts, settings, tracking and author memory need no migration, and in DSH the Skills and Roles update with the plugin, so `/story-setup` does not need to run again. For a long book imported earlier, have `/story-long-write` rewrite that volume's old plot units (剧情单元) as unit cards (单元卡) before continuing. The short-fiction platform is now called 知乎盐言; the old names 盐选 and 番茄短篇 are still recognized. NovelToGame 0.6.0 reviews scope against budget after the whitebox playtest and again halfway through production, and `director` mode pauses on visual-target candidates for your pick. The default host is now DSH `0.2.1-rc.2`.
 

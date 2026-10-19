@@ -42,7 +42,7 @@
 | 游戏 | [NovelToGame 0.6.0](https://github.com/zenstory-ai/novel-to-game) · 7 Skills · 《金瓶梅》ADV 可玩示例（18+） | `/novel-to-game quick`、`/game-build`、`/game-qa` |
 | 视频 | [video-recap-skills 0.6.2](https://github.com/zenstory-ai/video-recap-skills/releases/tag/v0.6.2) · 7 Skills（3 个用户入口） | `/video-recap`、`/video-script`、`/video-reference` |
 
-> 最新版本 **v0.1.17**（2026-10-19）。默认安装固定使用 DeepSeek Harness `0.2.1-rc.2`；仍支持更早的 `0.2.0-rc.2`。变更见 [CHANGELOG.md](CHANGELOG.md) 与 [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases)；升级步骤见常见问题[「升级到新版本后要做什么」](#升级到新版本后要做什么)。
+> 最新版本 **v0.1.18**（2026-10-19）。默认安装固定使用 DeepSeek Harness `0.2.1-rc.2`；仍支持更早的 `0.2.0-rc.2`。变更见 [CHANGELOG.md](CHANGELOG.md) 与 [Releases](https://github.com/zenstory-ai/oh-story-dsh/releases)；升级步骤见常见问题[「升级到新版本后要做什么」](#升级到新版本后要做什么)。
 
 ## 四个工作台
 
@@ -85,7 +85,7 @@
 需要 Node.js 24+。安装命令会临时提供 pnpm，只装了 Node.js 的机器也能执行：
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add @oh-story/dsh@0.1.17 &&
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add @oh-story/dsh@0.1.18 &&
 npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 ```
 
@@ -99,7 +99,7 @@ npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 GitHub Release 中的预构建包经过同一套测试：
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add https://github.com/zenstory-ai/oh-story-dsh/releases/download/v0.1.17/oh-story-dsh-0.1.17.tgz &&
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile web add https://github.com/zenstory-ai/oh-story-dsh/releases/download/v0.1.18/oh-story-dsh-0.1.18.tgz &&
 npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 ```
 
@@ -143,7 +143,7 @@ npx -y @deepseek-ai/dsh@0.2.1-rc.2 web
 插件装进哪个 profile，那个 profile 的每个 Session 就都会加载创作 Skills。想让原版 `web` 保持干净，就把插件装进独立 profile：
 
 ```bash
-npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile story add @oh-story/dsh@0.1.17
+npx -y --package pnpm@11.7.0 --package @deepseek-ai/dsh@0.2.1-rc.2 dsh plugin --profile story add @oh-story/dsh@0.1.18
 ```
 
 新 profile 默认没有界面。编辑 `~/.dsh/profiles/story/package.json`，把 `dsh.profile.bundles` 改成：
@@ -321,6 +321,8 @@ DSH 的 `plugin add` 内部需要 pnpm，单独运行 `npx @deepseek-ai/dsh ... 
 ### 升级到新版本后要做什么？
 
 重新执行安装命令，把 `@oh-story/dsh@` 后的版本号换成目标版本，再重启 DSH。安装与启动使用同一个宿主版本；当前支持范围见[安装](#安装)。Skills 与 Roles 随插件打包，无需在项目里重新部署。
+
+0.1.18 收尾 0.1.17 新用户审计里的界面问题（内置示例入口、视频环境检查、游戏预览状态、短剧 Python 3.9+），不用迁移，重装后重启即可。
 
 0.1.17 带来 Oh Story 0.9.0：各 Skill 的参考资料按写书的步骤重新整理，书稿、设定、追踪和作者记忆不用迁移；DSH 里 Skills 与 Roles 随插件更新，不用重跑 `/story-setup`。之前导入的长篇，续写前先让 `/story-long-write` 把那一卷导入时的旧剧情单元改写成单元卡。短篇平台统一叫「知乎盐言」，旧名「盐选」「番茄短篇」照常认。NovelToGame 0.6.0 会在白盒试玩后和生产过半时按预算复盘范围，`director` 模式在视觉目标候选处停下请你挑选。默认宿主改为 DSH `0.2.1-rc.2`。
 

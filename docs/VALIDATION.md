@@ -1,6 +1,30 @@
 # Validation
 
-Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earlier `0.2.0-rc.2` line covered. Local aggregate acceptance, a new-user product audit and paid-provider review passed on 2026-10-19.
+Released: `@oh-story/dsh` 0.1.18 on DeepSeek Harness `0.2.1-rc.2`, with the earlier `0.2.0-rc.2` line covered. Local aggregate acceptance passed on 2026-10-19; the new-user product audit and paid-provider review are the 0.1.17 evidence below.
+
+## 0.1.18 release evidence
+
+0.1.18 fixes the plugin-owned P2/P3 findings left by the 0.1.17 new-user audit. Upstream Skill pins, the default host and the paid-provider surface are unchanged from 0.1.17.
+
+### Local evidence
+
+- Fixed findings:
+  - The bundled Jin Ping Mei example (18+) is reachable from the welcome card before any creative work.
+  - The empty 视频 state runs the runtime check.
+  - The game preview probe reads the build on the page's own origin. It no longer reports a false 「预览载入失败」 beside a working game.
+  - The drama Python floor follows the bundled scripts' declared 3.9; video stays 3.10.
+  - The file tree re-lists the workspace while a Session runs.
+  - Game project names drop the brief label, dash and wrapping 书名号.
+- New unit tests cover the preview status rules, the same-origin probe address, project-name cleanup, the empty-video runtime check, and the drama Python floor checked against every bundled script's `MINIMUM_PYTHON`.
+- The packaged smoke covers the example entry, the loaded preview status across the loopback-alias isolation, the empty-video runtime check, and the absence of a stored workspace layout after the example visit.
+- On 2026-10-19, `pnpm verify:release` passed on the merged source (`4648ca2`): lint, typecheck, four parity checks, the DSH boundary, release and upstream-update tests, 198 unit/contract tests across 25 files, and the build. Packaged Chrome on DSH `0.2.1-rc.2` and `0.2.0-rc.2` returned `"ok": true`.
+- An independent review found no blockers. Its should-fix and nit findings were fixed before merge: the error flickering during quiet refreshes, the in-flight flag race, the stored layout choice, and the ARIA role.
+- The live file-tree refresh has no automated test, because the fixture model starts no long-running writing Role.
+
+### Release gates
+
+- **Local aggregate acceptance:** passed 2026-10-19.
+- **New-user audit and paid provider:** not rerun. 0.1.18 changes only Browser workbench surfaces and host preflight floors. The 0.1.17 evidence below still applies to Skills, Roles and provider behaviour.
 
 ## 0.1.17 release evidence
 
@@ -19,7 +43,6 @@ Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earl
   - Drama and game workspaces opened on an empty 小说 tab.
   - The welcome card implied that adding a folder came first.
 - The build now runs a bundled checker and fails if it cannot load. The rebuilt candidate was re-checked on a fresh DSH `0.2.1-rc.2`: the short-story workspace shows 小说 · 短篇, and a drama-only workspace opens on 短剧 before and after a reload.
-- The plugin-owned P2/P3 findings were also fixed before tagging: the bundled Jin Ping Mei example (18+) is reachable from the welcome card before any creative work; the empty 视频 state runs the runtime check; the game preview probe reads the build on the page's own origin, so it no longer reports a false 「预览载入失败」 beside a working game; the drama Python floor follows the bundled scripts' declared 3.9 (video stays 3.10); the file tree re-lists the workspace while a Session runs; and game project names drop the brief label, dash and wrapping 书名号. The packaged smoke covers the example entry, the loaded preview status across the loopback-alias isolation and the empty-video runtime check.
 - Findings that belong to the DSH host are recorded for upstream follow-up rather than claimed as fixed: stop not cascading to subagents, the native folder picker's missing page feedback, English progress, and token-only usage. So are findings that belong to the upstream Skills: long first-turn latency, short chapters, and editing on a vague request without asking first.
 
 ### Paid provider
@@ -28,7 +51,7 @@ Released: `@oh-story/dsh` 0.1.17 on DeepSeek Harness `0.2.1-rc.2`, with the earl
 
 ### Release gates
 
-- **Local aggregate acceptance:** passed 2026-10-19. This is the full `pnpm verify:release` with packaged Chrome on `0.2.1-rc.2` and `0.2.0-rc.2`, repeated on the final source after the audit fixes, and again after the P2/P3 follow-up fixes (198 unit/contract tests across 25 files).
+- **Local aggregate acceptance:** passed 2026-10-19. This is the full `pnpm verify:release` with packaged Chrome on `0.2.1-rc.2` and `0.2.0-rc.2`, repeated on the final source after the audit fixes.
 - **New-user audit:** passed 2026-10-19. No P0 findings, and every plugin-owned P1 was fixed and re-verified on DSH.
 - **Paid provider:** passed 2026-10-19. Native Story and Drama review succeeded, with both required Roles returning results.
 
